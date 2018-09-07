@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/shapes_todo_list"
+    android:padding="10dp"
+    android:id="@+id/todoItemLayout"
+    >
+
+    <TextView
+        android:id="@+id/todoTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/labelValue"
+        android:textSize="17sp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        />
+    
+    <TextView
+        android:id="@+id/todoDescription"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/labelTitle"
+        android:textSize="15sp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        />
+
+</LinearLayout>

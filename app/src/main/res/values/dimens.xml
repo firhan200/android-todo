@@ -1,0 +1,12 @@
+<resources>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="toolbar_title">18sp</dimen>
+    <dimen name="labelTitle">18sp</dimen>
+    <dimen name="labelValue">20sp</dimen>
+    <dimen name="labelValueMarginBottom">10dp</dimen>
+    <dimen name="pinBox">50dp</dimen>
+    <dimen name="pinBoxTextSize">20sp</dimen>
+    <dimen name="pinBoxPadding">10dp</dimen>
+    <dimen name="pinButtonWidth">70dp</dimen>
+    <dimen name="pinButtonMargin">5dp</dimen>
+</resources>

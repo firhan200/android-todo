@@ -1,0 +1,15 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="enablePin"
+        android:summary="Enable/Disable Pin."
+        android:title="Pin" />
+
+    <Preference
+        android:id="@+id/change_pin"
+        android:title="Change Pin"
+        android:key="changePin"
+        />
+
+</PreferenceScreen>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#f23a3a</color>
+    <color name="colorPrimaryDark">#9f3030</color>
+    <color name="colorAccent">#d75e70</color>
+    <color name="labelTitle">#a3a3a3</color>
+    <color name="labelValue">#696969</color>
+    <color name="toolbarColor">#ffffff</color>
+    <color name="todoListBackground">#ffffff</color>
+    <color name="todoListSelectedBackground">#f2f2f2</color>
+    <color name="todoListSeparatorColor">#e6e6e6</color>
+</resources>
