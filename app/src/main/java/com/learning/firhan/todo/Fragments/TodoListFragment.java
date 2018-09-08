@@ -125,6 +125,14 @@ public class TodoListFragment extends Fragment {
         todoRecyclerAdapter.notifyDataSetChanged();
     }
 
+    public void unselectAllSelectedItem(){
+        for(TodoItem todoItem: selectedTodoItems){
+            todoItem.setSelected(false);
+        }
+        selectedTodoItems.clear();
+        todoRecyclerAdapter.notifyDataSetChanged();
+    }
+
     private void setNoResultsLabelVisibility(){
         if(todoItems.size() > 0){
             noResultsLabel.setVisibility(View.GONE);
@@ -224,6 +232,7 @@ public class TodoListFragment extends Fragment {
         @Override
         protected void onPostExecute(Object o) {
             loadingDialogFragment.dismiss();
+            selectedTodoItems.clear();
             iMainActivity.rePopulateTodoList();
             iMainActivity.setSelectedActionBar(false);
             Toast.makeText(getContext(), "Successfully delete "+totalItem+" item", Toast.LENGTH_SHORT);

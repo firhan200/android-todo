@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -65,8 +66,16 @@ public class TodoRecyclerAdapter extends RecyclerView.Adapter<TodoRecyclerAdapte
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder viewHolder, int i) {
         final TodoItem todoItem = todoItems.get(i);
+        Log.d(TAG, "onBindViewHolder: "+todoItem.getTitle()+" = "+todoItem.getSelected());
         viewHolder.todoTitle.setText(todoItem.getTitle());
         viewHolder.todoDescription.setText(todoItem.getDesciption());
+
+        //check if selected or not
+        if(!todoItem.getSelected()){
+            viewHolder.todoItemLayout.setBackground(context.getResources().getDrawable(R.drawable.shapes_todo_list));
+        }else{
+            viewHolder.todoItemLayout.setBackgroundColor(context.getResources().getColor(R.color.todoListSelectedBackground));
+        }
 
         viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -90,14 +99,12 @@ public class TodoRecyclerAdapter extends RecyclerView.Adapter<TodoRecyclerAdapte
             public boolean onLongClick(View v) {
                 if(todoItem.getSelected()){
                     //unselect
-                    todoItem.setSelected(false);
                     iMainActivity.removeFromSelectedItemList(todoItem);
-                    viewHolder.todoItemLayout.setBackground(context.getResources().getDrawable(R.drawable.shapes_todo_list));
+                    setItemSelected(todoItem, viewHolder.todoItemLayout, true);
                 }else{
                     //select
-                    todoItem.setSelected(true);
                     iMainActivity.addToSelectedItemList(todoItem);
-                    viewHolder.todoItemLayout.setBackgroundColor(context.getResources().getColor(R.color.todoListSelectedBackground));
+                    setItemSelected(todoItem, viewHolder.todoItemLayout, false);
                 }
 
                 return true;
@@ -110,6 +117,17 @@ public class TodoRecyclerAdapter extends RecyclerView.Adapter<TodoRecyclerAdapte
                 setPopupMenu(v, todoItem);
             }
         });
+    }
+
+    private void setItemSelected(TodoItem todoItem, LinearLayout layout, Boolean isSelected){
+        if(isSelected){
+            todoItem.setSelected(false);
+            layout.setBackground(context.getResources().getDrawable(R.drawable.shapes_todo_list));
+        }else{
+            todoItem.setSelected(true);
+            iMainActivity.addToSelectedItemList(todoItem);
+            layout.setBackgroundColor(context.getResources().getColor(R.color.todoListSelectedBackground));
+        }
     }
 
     @Override

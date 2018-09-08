@@ -268,6 +268,7 @@ public class MainActivity extends AppCompatActivity implements IMainActivity, IT
     public void onBackPressed() {
         if(selectedActionToolbar.getVisibility()==View.VISIBLE){
             setSelectedActionBar(false);
+            todoListFragment.unselectAllSelectedItem();
         }else{
             super.onBackPressed();
         }
