@@ -8,6 +8,7 @@ public class TodoItem implements Parcelable{
     private String title;
     private String desciption;
     private Boolean isSelected;
+    private Boolean isCollapsed;
 
     public TodoItem(int id, String title, String desciption) {
         this.id = id;
@@ -45,6 +46,14 @@ public class TodoItem implements Parcelable{
 
     public void setSelected(Boolean selected) {
         isSelected = selected;
+    }
+
+    public Boolean getCollapsed() {
+        return isCollapsed;
+    }
+
+    public void setCollapsed(Boolean collapsed) {
+        isCollapsed = collapsed;
     }
 
     @Override

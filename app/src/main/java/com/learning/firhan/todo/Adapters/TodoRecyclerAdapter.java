@@ -1,18 +1,18 @@
 package com.learning.firhan.todo.Adapters;
 
 import android.content.Context;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.learning.firhan.todo.Fragments.TodoDetailFragment;
-import com.learning.firhan.todo.MainActivity;
+import com.learning.firhan.todo.Interfaces.ITodoSQliteHelper;
 import com.learning.firhan.todo.Models.TodoItem;
 import com.learning.firhan.todo.R;
 
@@ -24,21 +24,28 @@ public class TodoRecyclerAdapter extends RecyclerView.Adapter<TodoRecyclerAdapte
     ArrayList<TodoItem> todoItems;
     Context context;
 
+    ITodoSQliteHelper iTodoSQliteHelper;
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
         LinearLayout todoItemLayout;
-        public TextView todoTitle, todoDescription;
+        TextView todoTitle, todoDescription;
+        ImageView moreButton;
+
         public ViewHolder(View v) {
             super(v);
             todoItemLayout = (LinearLayout)v.findViewById(R.id.todoItemLayout);
             todoTitle = (TextView)v.findViewById(R.id.todoTitle);
             todoDescription = (TextView)v.findViewById(R.id.todoDescription);
+            moreButton = (ImageView)v.findViewById(R.id.moreButton);
         }
     }
 
     public TodoRecyclerAdapter(Context applicationContext, ArrayList<TodoItem> todoItems) {
         this.todoItems = todoItems;
         this.context = applicationContext;
+
+        iTodoSQliteHelper = (ITodoSQliteHelper)context;
     }
 
     @NonNull
@@ -56,15 +63,24 @@ public class TodoRecyclerAdapter extends RecyclerView.Adapter<TodoRecyclerAdapte
     public void onBindViewHolder(@NonNull final ViewHolder viewHolder, int i) {
         final TodoItem todoItem = todoItems.get(i);
         todoItem.setSelected(false);
+        todoItem.setCollapsed(true);
         viewHolder.todoTitle.setText(todoItem.getTitle());
         viewHolder.todoDescription.setText(todoItem.getDesciption());
 
         viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Bundle bundle = new Bundle();
-                bundle.putParcelable("todo", todoItem);
-                ((MainActivity)context).setFragment(context.getString(R.string.todo_detail_fragment), true, bundle);
+                if(todoItem.getCollapsed()){
+                    todoItem.setCollapsed(false);
+                    //expand
+                    viewHolder.todoTitle.setMaxLines(20);
+                    viewHolder.todoDescription.setMaxLines(200);
+                }else{
+                    todoItem.setCollapsed(true);
+                    //collapse
+                    viewHolder.todoTitle.setMaxLines(1);
+                    viewHolder.todoDescription.setMaxLines(1);
+                }
             }
         });
 
@@ -84,6 +100,13 @@ public class TodoRecyclerAdapter extends RecyclerView.Adapter<TodoRecyclerAdapte
                 return true;
             }
         });
+
+        viewHolder.moreButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setPopupMenu(v, todoItem);
+            }
+        });
     }
 
     @Override
@@ -92,8 +115,26 @@ public class TodoRecyclerAdapter extends RecyclerView.Adapter<TodoRecyclerAdapte
         return total;
     }
 
-    @Override
-    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
-        Log.d(TAG, "onAttachedToRecyclerView: ");
+    private void setPopupMenu(View view, final TodoItem todoItem){
+        PopupMenu popupMenu = new PopupMenu(context, view);
+        popupMenu.getMenuInflater().inflate(R.menu.menu_edit_delete, popupMenu.getMenu());
+
+        //set click listener
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                if(menuItem.getItemId()==R.id.editItemButton){
+                    //edit item
+                    iTodoSQliteHelper.editTodo(todoItem);
+                }else if(menuItem.getItemId()==R.id.deleteItemButton){
+                    //delete item
+                    iTodoSQliteHelper.deleteTodo(todoItem.getId());
+                }
+
+                return false;
+            }
+        });
+
+        popupMenu.show();
     }
 }

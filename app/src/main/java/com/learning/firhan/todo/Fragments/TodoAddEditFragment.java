@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.learning.firhan.todo.Helpers.TodoDatabaseHelper;
 import com.learning.firhan.todo.Interfaces.IMainActivity;
@@ -21,6 +22,8 @@ public class TodoAddEditFragment extends BottomSheetDialogFragment {
     EditText todoTitle, todoDescription;
     Button submitBtn;
     IMainActivity iMainActivity;
+    TodoItem todoItem;
+    Boolean isEdit;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -28,14 +31,37 @@ public class TodoAddEditFragment extends BottomSheetDialogFragment {
         iMainActivity = (IMainActivity)getActivity();
     }
 
+    private void checkEditOrAddItem(){
+        //check argument
+        Bundle args = getArguments();
+        if(args!=null){
+            //get todo
+            todoItem = args.getParcelable("todoItem");
+            if(todoItem!=null){
+                isEdit = true;
+                populateDetail(todoItem);
+            }
+        }
+    }
+
+    private void populateDetail(TodoItem todoItem){
+        todoTitle.setText(todoItem.getTitle());
+        todoDescription.setText(todoItem.getDesciption());
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_add_edit_todo, container, false);
 
+        //set to add
+        isEdit = false;
+
         initIds(view);
         initHelpers();
         setSubmitBtnListener();
+
+        checkEditOrAddItem();
 
         return view;
     }
@@ -71,24 +97,49 @@ public class TodoAddEditFragment extends BottomSheetDialogFragment {
         }
 
         //save into SQLite
-        TodoItem todoItem = new TodoItem(0, title, description);
-        boolean isSuccess = saveIntoDatabase(todoItem);
-        if(isSuccess){
+        long newRowId = 0;
+        if(!isEdit){
+            //add new item
+            todoItem = new TodoItem(0, title, description);
+        }else{
+            todoItem.setTitle(title);
+            todoItem.setDesciption(description);
+        }
+
+        newRowId = saveIntoDatabase(isEdit, todoItem);
+
+        if(newRowId > 0){
+            todoItem.setId((int) newRowId);
+
             //dismiss bottom sheet
             this.dismiss();
 
-            //add to list
-            iMainActivity.addTodoToList(todoItem);
+            if(!isEdit){
+                Toast.makeText(getContext(), "Add Item Success", Toast.LENGTH_SHORT).show();
+
+                //add new item
+                //add to list
+                iMainActivity.addTodoToList(todoItem);
+            }else{
+                Toast.makeText(getContext(), "Edit Item Success", Toast.LENGTH_SHORT).show();
+
+                //update item
+                iMainActivity.rePopulateTodoList();
+            }
         }
     }
 
-    private boolean saveIntoDatabase(TodoItem todoItem){
+    private long saveIntoDatabase(Boolean isEdit, TodoItem todoItem){
+        long newRowId = 0;
         //save into database
-        long newRowId = todoDatabaseHelper.insertData(todoItem);
-        if(newRowId > 0){
-            return true;
+        if(!isEdit){
+            //add
+            newRowId = todoDatabaseHelper.insertData(todoItem);
         }else{
-            return false;
+            //edit
+            newRowId = todoDatabaseHelper.updateData(todoItem);
         }
+
+        return newRowId;
     }
 }

@@ -29,6 +29,14 @@ public class TodoDatabaseHelper extends SQLiteOpenHelper {
         return newRowId;
     }
 
+    public long updateData(TodoItem todoItem){
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(COL_Title, todoItem.getTitle());
+        contentValues.put(COL_Description, todoItem.getDesciption());
+        long newRowId = sqLiteDatabase.update(TABLE_NAME, contentValues, COL_Id+"="+todoItem.getId(), null);
+        return newRowId;
+    }
+
     public int deleteData(int id){
         int deletedRowsId = sqLiteDatabase.delete(TABLE_NAME, COL_Id+"="+id, null);
         return deletedRowsId;

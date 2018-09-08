@@ -7,7 +7,6 @@
     <!-- String for fragment tag -->
 
     <string name="todo_list_fragment">Todo</string>
-    <string name="todo_detail_fragment">Detail</string>
 
     <!-- Strings related to Settings -->
 

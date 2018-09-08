@@ -1,53 +1,35 @@
 package com.learning.firhan.todo;
 
 import android.content.Intent;
-import android.database.Cursor;
-import android.nfc.Tag;
 import android.os.Bundle;
-import android.preference.PreferenceActivity;
-import android.preference.PreferenceManager;
-import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.Menu;
-import android.view.MenuItem;
-import android.widget.AdapterView;
 import android.widget.ImageButton;
-import android.widget.ListView;
 import android.widget.TextView;
 
-import com.learning.firhan.todo.Constant.SettingNames;
 import com.learning.firhan.todo.Fragments.TodoAddEditFragment;
-import com.learning.firhan.todo.Fragments.TodoDetailFragment;
 import com.learning.firhan.todo.Fragments.TodoListFragment;
-import com.learning.firhan.todo.Helpers.SettingDatabaseHelper;
-import com.learning.firhan.todo.Helpers.TodoDatabaseHelper;
 import com.learning.firhan.todo.Interfaces.IMainActivity;
-import com.learning.firhan.todo.Models.Setting;
+import com.learning.firhan.todo.Interfaces.ITodoSQliteHelper;
 import com.learning.firhan.todo.Models.TodoItem;
 
-import java.util.ArrayList;
-
-public class MainActivity extends AppCompatActivity implements IMainActivity {
+public class MainActivity extends AppCompatActivity implements IMainActivity, ITodoSQliteHelper {
     private static final String TAG = "MainActivity";
 
     TodoListFragment todoListFragment;
-    TodoDetailFragment todoDetailFragment;
     FragmentManager fragmentManager;
     FragmentTransaction fragmentTransaction;
     TextView toolbarTitle;
     ImageButton backButton, deleteButton, settingButton;
     FloatingActionButton addTodoButton;
-    MenuItem menuItem;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -111,7 +93,6 @@ public class MainActivity extends AppCompatActivity implements IMainActivity {
     private void initFragments(){
         //init fragment attribute
         todoListFragment = new TodoListFragment();
-        todoDetailFragment = new TodoDetailFragment();
 
         fragmentManager = getSupportFragmentManager();
     }
@@ -152,8 +133,6 @@ public class MainActivity extends AppCompatActivity implements IMainActivity {
         Fragment fragment = null;
         if(tag==getString(R.string.todo_list_fragment)){
             fragment = todoListFragment;
-        }else if(tag==getString(R.string.todo_detail_fragment)){
-            fragment = todoDetailFragment;
         }
 
         fragmentTransaction.replace(R.id.fragments_container, fragment, tag);
@@ -177,6 +156,11 @@ public class MainActivity extends AppCompatActivity implements IMainActivity {
     }
 
     @Override
+    public void rePopulateTodoList() {
+        todoListFragment.populateTodoList();
+    }
+
+    @Override
     public void setToolbarTitle(String title) {
         try{
             toolbarTitle.setText(title);
@@ -197,5 +181,22 @@ public class MainActivity extends AppCompatActivity implements IMainActivity {
             deleteButton.setVisibility(View.GONE);
             settingButton.setVisibility(View.VISIBLE);
         }
+    }
+
+    @Override
+    public void deleteTodo(int todoId) {
+        todoListFragment.deleteTodo(todoId);
+    }
+
+    @Override
+    public void editTodo(TodoItem todoItem) {
+        TodoAddEditFragment todoAddEditFragment = new TodoAddEditFragment();
+
+        //set bundle arguments
+        Bundle bundle = new Bundle();
+        bundle.putParcelable("todoItem", todoItem);
+        todoAddEditFragment.setArguments(bundle);
+
+        todoAddEditFragment.show(getSupportFragmentManager(), "AddEditTodo");
     }
 }

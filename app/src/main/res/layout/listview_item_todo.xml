@@ -4,28 +4,53 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:background="@drawable/shapes_todo_list"
-    android:padding="10dp"
+    android:paddingLeft="20dp"
+    android:paddingRight="20dp"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp"
     android:id="@+id/todoItemLayout"
     >
 
-    <TextView
-        android:id="@+id/todoTitle"
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColor="@color/labelValue"
-        android:textSize="17sp"
-        android:ellipsize="end"
-        android:maxLines="1"
-        />
-    
-    <TextView
-        android:id="@+id/todoDescription"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColor="@color/labelTitle"
-        android:textSize="15sp"
-        android:ellipsize="end"
-        android:maxLines="1"
-        />
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+            <TextView
+                android:id="@+id/todoTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/labelValue"
+                android:textSize="17sp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                />
+
+            <TextView
+                android:id="@+id/todoDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/labelTitle"
+                android:textSize="15sp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                />
+
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/moreButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-5dp"
+            android:src="@drawable/ic_more"/>
+
+    </LinearLayout>
 
 </LinearLayout>

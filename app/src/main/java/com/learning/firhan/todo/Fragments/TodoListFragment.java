@@ -11,9 +11,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.learning.firhan.todo.Helpers.TodoDatabaseHelper;
 import com.learning.firhan.todo.Interfaces.IMainActivity;
+import com.learning.firhan.todo.Interfaces.ITodoSQliteHelper;
 import com.learning.firhan.todo.MainActivity;
 import com.learning.firhan.todo.Models.TodoItem;
 import com.learning.firhan.todo.R;
@@ -70,13 +72,18 @@ public class TodoListFragment extends Fragment {
         mRecyclerView.setHasFixedSize(true);
 
         //adapter
-        todoRecyclerAdapter = new TodoRecyclerAdapter(getActivity(), todoItems);
+        todoRecyclerAdapter = new TodoRecyclerAdapter(getContext(), todoItems);
         mRecyclerView.setAdapter(todoRecyclerAdapter);
     }
 
     public void populateTodoList(){
         todoItems.clear();
         getTodoItemsFromDatabase();
+        setNoResultsLabelVisibility();
+        todoRecyclerAdapter.notifyDataSetChanged();
+    }
+
+    private void setNoResultsLabelVisibility(){
         if(todoItems.size() > 0){
             noResultsLabel.setVisibility(View.GONE);
         }else{
@@ -95,6 +102,38 @@ public class TodoListFragment extends Fragment {
         }
     }
 
+    public void deleteTodo(int todoId){
+        //delete from sqlite
+        todoDatabaseHelper.deleteData(todoId);
+        //get item position
+        TodoItem todoItem = getTodoItemById(todoId);
+        if(todoItem!=null){
+            //get position
+            int position = todoItems.indexOf(todoItem);
+
+            //remove from list
+            todoItems.remove(todoItem);
+
+            todoRecyclerAdapter.notifyItemRemoved(position);
+
+            setNoResultsLabelVisibility();
+
+            Toast.makeText(getContext(), "Delete Item Sucess", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private TodoItem getTodoItemById(int todoId){
+        TodoItem todoItemResult = null;
+
+        for(TodoItem todoItem : todoItems){
+            if(todoItem.getId()==todoId){
+                todoItemResult = todoItem;
+            }
+        }
+
+        return  todoItemResult;
+    }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -107,5 +146,6 @@ public class TodoListFragment extends Fragment {
         Log.d(TAG, "addTodo: "+todoItems.size());
         todoItems.add(0,todoItem);
         todoRecyclerAdapter.notifyItemInserted(0);
+        setNoResultsLabelVisibility();
     }
 }
