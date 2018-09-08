@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.learning.firhan.todo.Interfaces.IMainActivity;
 import com.learning.firhan.todo.Interfaces.ITodoSQliteHelper;
 import com.learning.firhan.todo.Models.TodoItem;
 import com.learning.firhan.todo.R;
@@ -25,6 +26,7 @@ public class TodoRecyclerAdapter extends RecyclerView.Adapter<TodoRecyclerAdapte
     Context context;
 
     ITodoSQliteHelper iTodoSQliteHelper;
+    IMainActivity iMainActivity;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
@@ -45,6 +47,7 @@ public class TodoRecyclerAdapter extends RecyclerView.Adapter<TodoRecyclerAdapte
         this.todoItems = todoItems;
         this.context = applicationContext;
 
+        iMainActivity = (IMainActivity)context;
         iTodoSQliteHelper = (ITodoSQliteHelper)context;
     }
 
@@ -62,8 +65,6 @@ public class TodoRecyclerAdapter extends RecyclerView.Adapter<TodoRecyclerAdapte
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder viewHolder, int i) {
         final TodoItem todoItem = todoItems.get(i);
-        todoItem.setSelected(false);
-        todoItem.setCollapsed(true);
         viewHolder.todoTitle.setText(todoItem.getTitle());
         viewHolder.todoDescription.setText(todoItem.getDesciption());
 
@@ -90,10 +91,12 @@ public class TodoRecyclerAdapter extends RecyclerView.Adapter<TodoRecyclerAdapte
                 if(todoItem.getSelected()){
                     //unselect
                     todoItem.setSelected(false);
+                    iMainActivity.removeFromSelectedItemList(todoItem);
                     viewHolder.todoItemLayout.setBackground(context.getResources().getDrawable(R.drawable.shapes_todo_list));
                 }else{
                     //select
                     todoItem.setSelected(true);
+                    iMainActivity.addToSelectedItemList(todoItem);
                     viewHolder.todoItemLayout.setBackgroundColor(context.getResources().getColor(R.color.todoListSelectedBackground));
                 }
 

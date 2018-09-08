@@ -1,5 +1,6 @@
 package com.learning.firhan.todo;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -7,12 +8,15 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.view.Menu;
 import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.learning.firhan.todo.Fragments.TodoAddEditFragment;
@@ -27,9 +31,10 @@ public class MainActivity extends AppCompatActivity implements IMainActivity, IT
     TodoListFragment todoListFragment;
     FragmentManager fragmentManager;
     FragmentTransaction fragmentTransaction;
-    TextView toolbarTitle;
+    TextView toolbarTitle, totalSelected, deleteSelected;
     ImageButton backButton, deleteButton, settingButton;
     FloatingActionButton addTodoButton;
+    RelativeLayout defaultToolbar,selectedActionToolbar;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -54,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements IMainActivity, IT
         initFragments();
         setAddTodoButtonListener();
         setSettingButtonListener();
+        setDeleteSelectedListener();
 
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -77,6 +83,10 @@ public class MainActivity extends AppCompatActivity implements IMainActivity, IT
         deleteButton = (ImageButton)findViewById(R.id.delete_button);
         settingButton = (ImageButton)findViewById(R.id.setting_button);
         addTodoButton = (FloatingActionButton) findViewById(R.id.fab);
+        defaultToolbar = (RelativeLayout)findViewById(R.id.defaultToolbar);
+        selectedActionToolbar = (RelativeLayout)findViewById(R.id.selectedActionToolbar);
+        totalSelected = (TextView)findViewById(R.id.totalSelected);
+        deleteSelected = (TextView)findViewById(R.id.deleteSelected);
     }
 
     private void setToolbar(){
@@ -118,6 +128,43 @@ public class MainActivity extends AppCompatActivity implements IMainActivity, IT
         });
     }
 
+    private void setDeleteSelectedListener(){
+        deleteSelected.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder deleteAlert = new AlertDialog.Builder(new ContextThemeWrapper(MainActivity.this, R.style.AppTheme_Dialog));
+                deleteAlert.setMessage("Delete Selected Items?");
+                deleteAlert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        todoListFragment.deleteSelectedItems();
+                    }
+                });
+                deleteAlert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        setSelectedActionBar(false);
+                    }
+                });
+                deleteAlert.create().show();
+            }
+        });
+    }
+
+    @Override
+    public void setSelectedActionBar(Boolean isActive){
+        if(isActive){
+            //activate
+            defaultToolbar.setVisibility(View.GONE);
+            selectedActionToolbar.setVisibility(View.VISIBLE);
+        }else{
+            //deactivate
+            //activate
+            selectedActionToolbar.setVisibility(View.GONE);
+            defaultToolbar.setVisibility(View.VISIBLE);
+        }
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -156,8 +203,25 @@ public class MainActivity extends AppCompatActivity implements IMainActivity, IT
     }
 
     @Override
+    public void addToSelectedItemList(TodoItem todoItem) {
+        todoListFragment.addSelectedTodoItem(todoItem);
+    }
+
+    @Override
+    public void removeFromSelectedItemList(TodoItem todoItem) {
+        todoListFragment.removeSelectedTodoItem(todoItem);
+    }
+
+    @Override
     public void rePopulateTodoList() {
         todoListFragment.populateTodoList();
+    }
+
+    @Override
+    public void setTotalSelected(int totalSelected) {
+        String total =  String.valueOf(totalSelected);
+        String selectedLabel = total + " Selected";
+        this.totalSelected.setText(selectedLabel);
     }
 
     @Override
@@ -198,5 +262,14 @@ public class MainActivity extends AppCompatActivity implements IMainActivity, IT
         todoAddEditFragment.setArguments(bundle);
 
         todoAddEditFragment.show(getSupportFragmentManager(), "AddEditTodo");
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(selectedActionToolbar.getVisibility()==View.VISIBLE){
+            setSelectedActionBar(false);
+        }else{
+            super.onBackPressed();
+        }
     }
 }

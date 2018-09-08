@@ -119,6 +119,8 @@ public class TodoAddEditFragment extends BottomSheetDialogFragment {
 
                 //add new item
                 //add to list
+                todoItem.setSelected(false);
+                todoItem.setCollapsed(true);
                 iMainActivity.addTodoToList(todoItem);
             }else{
                 Toast.makeText(getContext(), "Edit Item Success", Toast.LENGTH_SHORT).show();

@@ -1,6 +1,7 @@
 package com.learning.firhan.todo.Fragments;
 
 import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -28,7 +29,7 @@ public class TodoListFragment extends Fragment {
 
     TodoDatabaseHelper todoDatabaseHelper;
     TextView noResultsLabel;
-    ArrayList<TodoItem> todoItems;
+    ArrayList<TodoItem> todoItems, selectedTodoItems;
     IMainActivity iMainActivity;
 
     //RecyclerView Attributes
@@ -38,6 +39,8 @@ public class TodoListFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        iMainActivity = (IMainActivity)getContext();
     }
 
     @Override
@@ -47,9 +50,48 @@ public class TodoListFragment extends Fragment {
         initIds(view);
         initHelpers();
         initTodoListView();
+        initSelectedTodoItems();
         populateTodoList();
 
         return view;
+    }
+
+    private void initSelectedTodoItems(){
+        selectedTodoItems = new ArrayList<>();
+    }
+
+    private void setTotalSelected(){
+        iMainActivity.setTotalSelected(selectedTodoItems.size());
+    }
+
+    public void addSelectedTodoItem(TodoItem todoItem){
+        //check if first selected
+        if(selectedTodoItems.size() < 1){
+            //first select - > activate selected toolbar
+            iMainActivity.setSelectedActionBar(true);
+        }
+
+        if(!selectedTodoItems.contains(todoItem)){
+            //list doest not contain this item
+            selectedTodoItems.add(todoItem);
+            setTotalSelected();
+            Log.d(TAG, "addSelectedTodoItem: "+todoItem.getTitle()+" added");
+        }
+    }
+
+    public void removeSelectedTodoItem(TodoItem todoItem){
+        if(selectedTodoItems.contains(todoItem)){
+            //item exist in list -> remove ite
+            selectedTodoItems.remove(todoItem);
+            Log.d(TAG, "removeSelectedTodoItem: "+todoItem.getTitle()+" removed");
+
+            //check if is empty
+            if(selectedTodoItems.size() < 1){
+                iMainActivity.setSelectedActionBar(false);
+            }
+
+            setTotalSelected();
+        }
     }
 
     private void initIds(View view){
@@ -97,7 +139,10 @@ public class TodoListFragment extends Fragment {
         if(result.getCount() > 0){
             //there is some data
             while(result.moveToNext()){
-                todoItems.add(new TodoItem(result.getInt(0) ,result.getString(1), result.getString(2)));
+                TodoItem todoItem = new TodoItem(result.getInt(0) ,result.getString(1), result.getString(2));
+                todoItem.setSelected(false);
+                todoItem.setCollapsed(true);
+                todoItems.add(todoItem);
             }
         }
     }
@@ -122,6 +167,12 @@ public class TodoListFragment extends Fragment {
         }
     }
 
+    public void deleteSelectedItems(){
+        if(selectedTodoItems.size() > 0){
+            new DeleteSelectedItemsTask().execute();
+        }
+    }
+
     private TodoItem getTodoItemById(int todoId){
         TodoItem todoItemResult = null;
 
@@ -137,7 +188,6 @@ public class TodoListFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        iMainActivity = (MainActivity)getActivity();
         iMainActivity.setToolbarTitle("Todo");
         iMainActivity.hasBackButton(false);
     }
@@ -147,5 +197,37 @@ public class TodoListFragment extends Fragment {
         todoItems.add(0,todoItem);
         todoRecyclerAdapter.notifyItemInserted(0);
         setNoResultsLabelVisibility();
+    }
+
+    class DeleteSelectedItemsTask extends AsyncTask{
+        LoadingDialogFragment loadingDialogFragment;
+        int totalItem;
+
+        @Override
+        protected void onPreExecute() {
+            loadingDialogFragment = new LoadingDialogFragment();
+            loadingDialogFragment.show(getFragmentManager(), "loading");
+
+            totalItem = selectedTodoItems.size();
+            super.onPreExecute();
+        }
+
+        @Override
+        protected Object doInBackground(Object[] objects) {
+            for(TodoItem selectedTodoItem : selectedTodoItems){
+                todoDatabaseHelper.deleteData(selectedTodoItem.getId());
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Object o) {
+            loadingDialogFragment.dismiss();
+            iMainActivity.rePopulateTodoList();
+            iMainActivity.setSelectedActionBar(false);
+            Toast.makeText(getContext(), "Successfully delete "+totalItem+" item", Toast.LENGTH_SHORT);
+            super.onPostExecute(o);
+        }
     }
 }
